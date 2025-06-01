@@ -1,2 +1,12 @@
-<h1>Showing User</h1>
-<b>{@user.name}</b> {@user.id}
+<.flash_group flash={@flash} />
+
+<.header>
+  User
+</.header>
+
+<.list>
+  <:item title="ID"><%= @user.id %></:item>
+  <:item title="Name"><%= @user.name %></:item>
+  <:item title="Username"><%= @user.username %></:item>
+</.list>
+
