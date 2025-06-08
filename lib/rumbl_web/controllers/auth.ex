@@ -1,7 +1,7 @@
 defmodule RumblWeb.Auth do
   import Phoenix.Controller
   import Plug.Conn
-  
+
   # Duplicated the import from rumbl_web.ex into here to avoid a circular
   # dependency between this module and rumbl_web.
   # This import is needed to use the new ~p syntax for saying routes.
@@ -10,28 +10,34 @@ defmodule RumblWeb.Auth do
     router: RumblWeb.Router,
     statics: RumblWeb.static_paths()
 
-  
+
   def init(opts) do
     opts
   end
-  
+
   def call(conn, _opts) do
     user_id = get_session(conn, :user_id)
-    user = user_id && Rumbl.Accounts.get_user(user_id)
-    assign(conn, :current_user, user)
+
+    cond do
+      conn.assigns[:current_user] -> conn
+
+      user = user_id && Rumbl.Accounts.get_user(user_id) -> assign(conn, :current_user, user)
+
+      true -> assign(conn, :current_user, nil)
+    end
   end
-  
+
   def login(conn, user) do
     conn
     |> assign(:current_user, user)
     |> put_session(:user_id, user.id)
     |> configure_session(renew: true)
   end
-  
+
   def logout(conn) do
     configure_session(conn, drop: true)
   end
-  
+
   def authenticate_user(conn, _opts) do
     if conn.assigns.current_user do
       conn
