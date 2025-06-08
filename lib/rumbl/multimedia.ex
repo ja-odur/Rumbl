@@ -7,7 +7,23 @@ defmodule Rumbl.Multimedia do
   alias Rumbl.Repo
   
   alias Rumbl.Accounts
+  alias Rumbl.Multimedia.Category
   alias Rumbl.Multimedia.Video
+  
+  @doc """
+  Create a category.
+
+  Upsert to avoid raising an exception when category already exists.
+  """
+  def create_category!(name) do
+    Repo.insert!(%Category{name: name}, on_conflict: :nothing)
+  end
+  
+  def list_alphabetical_categories do
+    Category
+    |> Category.alphabetical()
+    |> Repo.all()
+  end
 
   @doc """
   Returns the list of videos.

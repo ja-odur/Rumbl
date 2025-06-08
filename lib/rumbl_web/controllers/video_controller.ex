@@ -4,6 +4,12 @@ defmodule RumblWeb.VideoController do
   alias Rumbl.Multimedia
   alias Rumbl.Multimedia.Video
 
+  plug :load_categories when action in [:new, :create, :edit, :update]
+
+  defp load_categories(conn, _params) do
+    assign(conn, :categories, Multimedia.list_alphabetical_categories())
+  end
+
   def action(conn, _) do
     args = [conn, conn.params, conn.assigns.current_user]
     apply(__MODULE__, action_name(conn), args)
@@ -16,7 +22,7 @@ defmodule RumblWeb.VideoController do
 
   def new(conn, _params, _current_user) do
     changeset = Multimedia.change_video(%Video{})
-    render(conn, :new, changeset: changeset)
+    render(conn, :new, changeset: changeset, categories: conn.assigns.categories)
   end
 
   def create(conn, %{"video" => video_params}, current_user) do
