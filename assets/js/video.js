@@ -32,18 +32,21 @@ let Video = {
     });
 
     videoChannel.on("new_annotation", (resp) => {
+      console.log("annotations", annotations);
       this.renderAnnotation(msgContainer, resp);
     });
 
     videoChannel
       .join()
-      .receive("ok", (resp) => console.log("joined the video channel", resp))
+      .receive("ok", ({ annotations }) => {
+        annotations.forEach((ann) => this.renderAnnotation(msgContainer, ann));
+      })
       .receive("error", (reason) => console.log("join failed", reason));
   },
 
   renderAnnotation(msgContainer, { user, body, at }) {
     let template = document.createElement("div");
-    
+
     template.innerHTML = `
       <a href="#" data-seek="${this.escapeInput(at)}">
         [${this.formatTime(at)}]
@@ -53,21 +56,19 @@ let Video = {
 
     msgContainer.appendChild(template);
     msgContainer.scrollTop = msgContainer.scrollHeight;
-
   },
-  
-  formatTime(at) {
-      let date = new Date(null);
-      date.setSeconds(at / 1000);
-      return date.toISOString().substr(14, 5);
-    },
-  
-    escapeInput(userInputString) {
-      let div = document.createElement("div");
-      div.appendChild(document.createTextNode(userInputString));
-      return div.innerHTML;
-    }
 
+  formatTime(at) {
+    let date = new Date(null);
+    date.setSeconds(at / 1000);
+    return date.toISOString().substr(14, 5);
+  },
+
+  escapeInput(userInputString) {
+    let div = document.createElement("div");
+    div.appendChild(document.createTextNode(userInputString));
+    return div.innerHTML;
+  },
 };
 
 export default Video;
