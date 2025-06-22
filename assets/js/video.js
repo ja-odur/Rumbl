@@ -39,9 +39,32 @@ let Video = {
     videoChannel
       .join()
       .receive("ok", ({ annotations }) => {
-        annotations.forEach((ann) => this.renderAnnotation(msgContainer, ann));
+        this.scheduleMessages(msgContainer, annotations);
       })
       .receive("error", (reason) => console.log("join failed", reason));
+  },
+  
+  scheduleMessages(msgContainer, annotations) {
+    clearTimeout(this.scheduletimer);
+
+    this.scheduleTimer = setTimeout(() => {
+      let currentTime = Player.getCurrentTime();
+      let remaining = this.renderAtTime(annotations, currentTime, msgContainer);
+      this.scheduleMessages(msgContainer, remaining);
+    }, 1000);
+  },
+  
+  renderAtTime(annotations, seconds, msgContainer) {
+    return annotations.filter(
+      annotation => {
+        if (annotation.at > seconds) {
+          return true;
+        } else {
+          this.renderAnnotation(msgContainer, annotation);
+          return false;
+        }
+      }
+    );
   },
 
   renderAnnotation(msgContainer, { user, body, at }) {
