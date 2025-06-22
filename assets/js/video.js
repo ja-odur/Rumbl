@@ -31,8 +31,20 @@ let Video = {
       msgInput.value = "";
     });
 
+    msgContainer.addEventListener("click", (e) => {
+      e.preventDefault();
+      let seconds =
+        e.target.getAttribute("data-seek") ||
+        e.target.parentNode.getAttribute("data-seek");
+
+      if (!seconds) {
+        return;
+      }
+
+      Player.seekTo(seconds);
+    });
+
     videoChannel.on("new_annotation", (resp) => {
-      console.log("annotations", annotations);
       this.renderAnnotation(msgContainer, resp);
     });
 
@@ -43,7 +55,7 @@ let Video = {
       })
       .receive("error", (reason) => console.log("join failed", reason));
   },
-  
+
   scheduleMessages(msgContainer, annotations) {
     clearTimeout(this.scheduletimer);
 
@@ -53,18 +65,16 @@ let Video = {
       this.scheduleMessages(msgContainer, remaining);
     }, 1000);
   },
-  
+
   renderAtTime(annotations, seconds, msgContainer) {
-    return annotations.filter(
-      annotation => {
-        if (annotation.at > seconds) {
-          return true;
-        } else {
-          this.renderAnnotation(msgContainer, annotation);
-          return false;
-        }
+    return annotations.filter((annotation) => {
+      if (annotation.at > seconds) {
+        return true;
+      } else {
+        this.renderAnnotation(msgContainer, annotation);
+        return false;
       }
-    );
+    });
   },
 
   renderAnnotation(msgContainer, { user, body, at }) {
